@@ -19,7 +19,7 @@ def get_data(name='HPE'):
 def load_data(name='hpe'):
     files = os.listdir('./data')
     for f in files:
-        if len(name) < len(f) and name == f[:len(name)]:
+        if len(name) <= len(f) and name == f[:len(name)]:
             return pd.read_csv('./data/' + f, parse_dates=['Date'], index_col=['Date'], dayfirst=True)
     return None
 
@@ -37,14 +37,16 @@ def moving_avg_window(d, timescale=5):
     for x in range(timescale, len(d)):
         tmp[start] = d.ix[start:x].sum() / timescale
         start += 1 
+    return pd.DataFrame(data=tmp, index=d[start:].index, columns=["moving average: " + d.name])
 
-    return pd.DataFrame(data=tmp, index=d[start:].index, columns=[d.name])
+stock_name = 'hpe'
 
-#data = get_data('HPE')
-data = load_data('hpe')
+#data = get_data(stock_name)
+data = load_data(stock_name)
 
 data["High"].subtract(data["Low"]).plot()
 data["High"].subtract(data["Low"]).describe()
+adj_y_limits()
 plt.pause(.001)
 plt.pause(.001)
 plt.close()
@@ -52,6 +54,8 @@ plt.pause(.001)
 
 data.ix[-10:]['Close'].plot()
 plt.pause(.001)
+pdr.get_quote_yahoo(stock_name)
+plt.close()
 
 plt.plot(moving_avg_window(data.ix[-10:]['Close']))
 plt.pause(.001)
