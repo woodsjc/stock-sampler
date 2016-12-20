@@ -31,6 +31,15 @@ def adj_y_limits():
         plt.ylim(a-1,0)
     plt.pause(.001)
 
+def moving_avg_window(d, timescale=5):
+    tmp = np.zeros(shape=(len(d)-timescale,1))
+    start = 0
+    for x in range(timescale, len(d)):
+        tmp[start] = d.ix[start:x].sum() / timescale
+        start += 1 
+
+    return pd.DataFrame(data=tmp, index=d[start:].index, columns=[d.name])
+
 #data = get_data('HPE')
 data = load_data('hpe')
 
@@ -44,11 +53,6 @@ plt.pause(.001)
 data.ix[-10:]['Close'].plot()
 plt.pause(.001)
 
-def moving_avg(d, timescale=5):
-    tmp = []
-    start = 0
-    for x in range(timescale, len(d)):
-        tmp += [d.ix[start:x].sum() / timescale]
-        start += 1 
-
-    return tmp
+plt.plot(moving_avg_window(data.ix[-10:]['Close']))
+plt.pause(.001)
+plt.pause(.001)
