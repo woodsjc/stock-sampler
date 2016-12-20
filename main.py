@@ -38,6 +38,8 @@ data["High"].subtract(data["Low"]).plot()
 data["High"].subtract(data["Low"]).describe()
 plt.pause(.001)
 plt.pause(.001)
+plt.close()
+plt.pause(.001)
 
 data.ix[-10:]['Close'].plot()
 plt.pause(.001)
@@ -46,6 +48,7 @@ def moving_avg(d, timescale=5):
     tmp = []
     start = 0
     for x in range(timescale, len(d)):
-        tmp += d[start:x].sum() / timescale 
+        tmp += [d.ix[start:x].sum() / timescale]
+        start += 1 
 
     return tmp
