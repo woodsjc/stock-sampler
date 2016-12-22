@@ -16,7 +16,7 @@ def get_data(name='HPE'):
     if not os.path.isdir('./data'):
         os.mkdir('./data')
     data.to_csv('./data/' + name + '.csv')
-    print("Wrote ./data" + name + '.csv')
+    print("Wrote ./data/" + name + '.csv')
     data.describe()
     return data
 
@@ -43,13 +43,18 @@ def moving_avg_window(d, timescale=5):
         start += 1 
     return pd.DataFrame(data=tmp, index=d[start:].index, columns=["moving average: " + d.name])
 
+def get_moving_avg(d, timescale=5):
+    if len(d) < timescale:
+        raise ValueError
+    return d[-timescale:].sum() / timescale
+
 def dl_sp500_data():
     sp500 = finsymbols.get_sp500_symbols()
     data = []
 
     for s in sp500:
         if 'symbol' in s:
-            data.append(get_data(s['symbol']))
+            data.append((get_data(s['symbol']),s['symbol']))
 
     return data
 
@@ -60,13 +65,29 @@ def load_sp500_data():
     for s in sp500:
         if 'symbol' in s:
             symbol = s['symbol']
-            tmp = load_data(symbol)
+            tmp = (load_data(symbol), symbol)
             if tmp is None:
-                data.append(get_data(symbol))
+                data.append((get_data(symbol),symbol))
             else:
                 data.append(tmp)
 
     return data
+
+def buy_or_sell(stock_list, current_bids, total_money):
+    '''Start off simple with decision based on 5 day moving average and expectation to regress to 
+    the mean. Then work on trends and other indicators. Eventually move to different file. Prices
+    seem very stable for the little testing I did (less than 10% off moving average). Only 5% 
+    picked up anything.
+    '''
+    for s, symbol in stock_list:
+        if s is None: 
+            continue
+        cur_price = s.ix[-1]['Close']
+        mov_avg = get_moving_avg(s.ix[:-1]['Close'], 5)
+        if cur_price < .95 * mov_avg:
+            print("Buy: {} at ${:.2f} vs ${:.2f}".format(symbol, cur_price, mov_avg))
+        elif cur_price > 1.05 * mov_avg:
+            print("Sell: {} at ${:.2f} vs ${:.2f}".format(symbol, cur_price, mov_avg))
 
 
 stock_name = 'hpe'
