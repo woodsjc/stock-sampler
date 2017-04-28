@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 #wating on pull request to work with python 3 for now can install from https://github.com/woodsjc/finsymbols
 import finsymbols
 
-START = datetime(2017,4,1)
+START = datetime(2017,4,14)
 END = datetime.today()
 
 def get_data(stockName='HPE'):
@@ -116,3 +116,7 @@ plt.close()
 sp500 = load_sp500_data()
 
 buy_or_sell(sp500, None, None)
+
+##TODO##
+#Add in logic for multi week comparisons so different algorithms/schemes can
+#be tested with prior data
